@@ -14,10 +14,10 @@ import { PlantProvider } from "@/context/PlantContext";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/tasks" component={Tasks} />
-      <Route path="/garden" component={Garden} />
-      <Route path="/chat" component={Chat} />
+      <Route path="/GrowYourTimes/" component={Dashboard} />
+      <Route path="/GrowYourTimes/tasks" component={Tasks} />
+      <Route path="/GrowYourTimes/garden" component={Garden} />
+      <Route path="/GrowYourTimes/chat" component={Chat} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -33,6 +33,7 @@ function App() {
           </Layout>
         </TaskProvider>
       </PlantProvider>
+
       <Toaster />
     </QueryClientProvider>
   );

@@ -3,8 +3,20 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
+  base: "/GrowYourTimes/",
+
   plugins: [react()],
-  resolve: { alias: { "@": path.resolve(__dirname, "src"), "@shared": path.resolve(__dirname, "shared"), "@assets": path.resolve(__dirname, "attached_assets") } },
-  base: "./",
-  build: { outDir: "dist", emptyOutDir: true }
+
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@shared": path.resolve(__dirname, "shared"),
+      "@assets": path.resolve(__dirname, "attached_assets"),
+    },
+  },
+
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+  },
 });

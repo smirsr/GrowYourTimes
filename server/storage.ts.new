@@ -1,0 +1,223 @@
+import { 
+  users, type User, type InsertUser, 
+  tasks, type Task, type InsertTask,
+  plants, type Plant, type InsertPlant,
+  chats, type Chat, type InsertChat
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc } from "drizzle-orm";
+
+// modify the interface with any CRUD methods
+// you might need
+
+export interface IStorage {
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  
+  // Task operations
+  getTask(id: number): Promise<Task | undefined>;
+  getTasksForUser(userId: number): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, task: Partial<Task>): Promise<Task | undefined>;
+  deleteTask(id: number): Promise<boolean>;
+  
+  // Plant operations
+  getPlant(id: number): Promise<Plant | undefined>;
+  getPlantsForUser(userId: number): Promise<Plant[]>;
+  getCurrentPlantForUser(userId: number): Promise<Plant | undefined>;
+  createPlant(plant: InsertPlant): Promise<Plant>;
+  updatePlant(id: number, plant: Partial<Plant>): Promise<Plant | undefined>;
+  
+  // Chat operations
+  getChatsForUser(userId: number): Promise<Chat[]>;
+  createChat(chat: InsertChat): Promise<Chat>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task || undefined;
+  }
+
+  async getTasksForUser(userId: number): Promise<Task[]> {
+    return db.select().from(tasks).where(eq(tasks.userId, userId));
+  }
+
+  async createTask(insertTask: InsertTask): Promise<Task> {
+    const [task] = await db
+      .insert(tasks)
+      .values(insertTask)
+      .returning();
+    return task;
+  }
+
+  async updateTask(id: number, taskUpdate: Partial<Task>): Promise<Task | undefined> {
+    const [updatedTask] = await db
+      .update(tasks)
+      .set(taskUpdate)
+      .where(eq(tasks.id, id))
+      .returning();
+    return updatedTask || undefined;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    const result = await db
+      .delete(tasks)
+      .where(eq(tasks.id, id))
+      .returning({ id: tasks.id });
+    return result.length > 0;
+  }
+
+  async getPlant(id: number): Promise<Plant | undefined> {
+    const [plant] = await db.select().from(plants).where(eq(plants.id, id));
+    return plant || undefined;
+  }
+
+  async getPlantsForUser(userId: number): Promise<Plant[]> {
+    return db.select().from(plants).where(eq(plants.userId, userId));
+  }
+
+  async getCurrentPlantForUser(userId: number): Promise<Plant | undefined> {
+    const [plant] = await db
+      .select()
+      .from(plants)
+      .where(and(
+        eq(plants.userId, userId),
+        eq(plants.completed, false)
+      ));
+    return plant || undefined;
+  }
+
+  async createPlant(insertPlant: InsertPlant): Promise<Plant> {
+    const [plant] = await db
+      .insert(plants)
+      .values({
+        ...insertPlant,
+        stage: 1,
+        points: 0,
+        completed: false,
+        startDate: new Date()
+      })
+      .returning();
+    return plant;
+  }
+
+  async updatePlant(id: number, plantUpdate: Partial<Plant>): Promise<Plant | undefined> {
+    const [updatedPlant] = await db
+      .update(plants)
+      .set(plantUpdate)
+      .where(eq(plants.id, id))
+      .returning();
+    return updatedPlant || undefined;
+  }
+
+  async getChatsForUser(userId: number): Promise<Chat[]> {
+    return db
+      .select()
+      .from(chats)
+      .where(eq(chats.userId, userId))
+      .orderBy(chats.timestamp);
+  }
+
+  async createChat(insertChat: InsertChat): Promise<Chat> {
+    const [chat] = await db
+      .insert(chats)
+      .values({
+        ...insertChat,
+        timestamp: new Date()
+      })
+      .returning();
+    return chat;
+  }
+}
+
+// Initialize with the database storage
+export const storage = new DatabaseStorage();
+
+// Seed initial demo user and data if needed
+async function seedInitialData() {
+  const username = "demo";
+  
+  // Check if demo user exists
+  let user = await storage.getUserByUsername(username);
+  
+  if (!user) {
+    // Create demo user
+    user = await storage.createUser({
+      username,
+      password: "password"
+    });
+    
+    // Add initial plant
+    await storage.createPlant({
+      name: "Sunflower", 
+      type: "sunflower", 
+      maxStage: 5, 
+      pointsToNextStage: 100,
+      userId: user.id
+    });
+    
+    // Add some tasks
+    await storage.createTask({
+      title: "Complete project presentation",
+      description: "Finalize slides and practice delivery",
+      dueDate: new Date(new Date().setHours(14, 30, 0, 0)),
+      points: 25,
+      userId: user.id
+    });
+    
+    await storage.createTask({
+      title: "Morning workout",
+      description: "30 minutes cardio + stretching",
+      dueDate: new Date(new Date().setHours(7, 0, 0, 0)),
+      points: 10,
+      userId: user.id,
+    });
+    
+    await storage.createTask({
+      title: "Grocery shopping",
+      description: "Pick up fruits, vegetables, and bread",
+      dueDate: new Date(new Date().setHours(16, 0, 0, 0)),
+      points: 15,
+      userId: user.id
+    });
+    
+    await storage.createTask({
+      title: "Read book chapter",
+      description: "Chapter 7 of \"The Psychology of Habits\"",
+      dueDate: new Date(new Date().setHours(20, 0, 0, 0)),
+      points: 10,
+      userId: user.id
+    });
+    
+    // Add initial chat message
+    await storage.createChat({
+      message: "Hi there! I'm your Plant Assistant. I can help you manage tasks, give gardening tips, or just chat. What would you like help with today?",
+      isUser: false,
+      userId: user.id
+    });
+  }
+}
+
+// Run the seeding (this will execute when the module is imported)
+seedInitialData().catch(err => console.error("Error seeding initial data:", err));

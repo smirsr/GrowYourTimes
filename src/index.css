@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 80 30% 92%;
+    --foreground: 120 30% 20%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 120 30% 20%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 30% 20%;
+    
+    --primary: 120 40% 40%;
+    --primary-light: 120 40% 85%;
+    --primary-dark: 120 50% 30%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 80 30% 92%;
+    --secondary-foreground: 120 30% 20%;
+    
+    --muted: 80 20% 92%;
+    --muted-foreground: 120 10% 40%;
+    
+    --accent: 120 40% 40%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 80 20% 85%;
+    --input: 80 20% 85%;
+    --ring: 120 40% 40%;
+    
+    --radius: 1.25rem;
+    
+    --chart-1: 120 40% 40%;
+    --chart-2: 100 40% 60%;
+    --chart-3: 80 30% 75%;
+    --chart-4: 60 40% 70%;
+    --chart-5: 40 60% 70%;
+    
+    --sidebar-background: 80 30% 92%;
+    --sidebar-foreground: 120 30% 20%;
+    --sidebar-primary: 120 40% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 120 40% 40%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 80 20% 85%;
+    --sidebar-ring: 120 40% 40%;
+  }
+  
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Quicksand', sans-serif;
+  }
+  
+  /* Chat bubble styling */
+  .chat-bubble {
+    position: relative;
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .user-bubble {
+    background-color: hsl(120, 40%, 40%);
+    color: white;
+    border-bottom-right-radius: 4px;
+    margin-left: auto;
+  }
+  
+  .ai-bubble {
+    background-color: hsl(80, 30%, 92%);
+    color: hsl(120, 30%, 20%);
+    border-bottom-left-radius: 4px;
+  }
+  
+  /* Plant growth container */
+  .plant-growth-container {
+    position: relative;
+  }
+  
+  /* Plant growth stages */
+  .plant-stage {
+    transition: all 0.5s ease-in-out;
+  }
+  
+  /* Task card hover effect */
+  .task-card {
+    transition: all 0.2s ease;
+  }
+  
+  .task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  }
+}
